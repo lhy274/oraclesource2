@@ -61,13 +61,24 @@ SELECT * FROM EMP WHeRE deptno = 30 OR job='clerk';
 --부서번호가 20이거나, 사원직책이 salesman 정보 조회
 SELECT * FROM emp WHeRE deptno=20 OR job='salesman';
 
+SELECT * FROM emp WHERE sal!=3000;
 
+select * from emp where sal >=2500 AND job='ANALYST';
 
+select * from emp WHERE job='manager' or job='SALESMAN' or job='clerk';
 
+select * from emp where sal!=3000;
 
+SELECT * FROM emp where SAL>=3000;
 
+in 연산자
+SELECT * FROM emp WHERE job IN('MANAGER', 'SALESMAN', 'CLERK');
 
+SELECT * FROM emp where job !='manager' AND job!='SALESMAN' AND job !='CLERK';
 
+SELECT * FROM emp deptno in(10, 20);
+
+--20번 및 50번 부서에서 근무하는 모든 사원들의 
 
 
 
