@@ -223,6 +223,8 @@ replace('010-1234-5678', '-',' ') as replace_1,
 replace('010-1234-5678', '-') as replace_2
 from dual;
 
+SELECT * FROM emp;
+
 -- 문자열 함수 : concat(연결)
 -- empno, ename을 연결하여 조회
 SELECT concat(empno,ename), concat(empno, concat(';', ename))

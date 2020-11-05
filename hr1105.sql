@@ -89,7 +89,7 @@ WHERE last_name like '%a%' OR last_name like '%e%' ORDER BY last_name;
 
 <<<<<<< HEAD
 select * from employees;
-
+select * from employees;
 =======
 >>>>>>> f57d9d0569701f468ac37f8d36c21b3e00578b50
 --last_name 에 a 와 e 글자가 있는 사원들의 last_name을 조회하여 last_name
