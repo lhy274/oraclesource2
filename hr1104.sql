@@ -194,7 +194,10 @@ GROUP BY job_id;
 -- JOIN 실습
 -- 자신의 담당 매니저의 고용일보다 빠른 입사자를 찾아 HIRE_DATE, LAST_NAME, 
 -- MANAGER_ID를 출력하시오(EMPLOYEES SELF JOIN)
-
+SELECT E1.HIRE_DATE, E1.LAST_NAME,E1.HIRE_DATE AS 내입사일,
+       E1.MANAGER_ID, E2.HIRE_DATE AS 매니저입사일
+FROM employees E1, employees E2
+WHERE e1.manager_id = e2.employee_id AND E1.HIRE_DATE < E2.HIRE_DATE;
 
 -- 도시 이름이 T로 시작하는 지역에 사는 사원들의 사번, LAST_NAME, 부서번호 조회
 -- (EMPLOYEES 의 DEPARTMENT_ID 와 DEPARTMENTS의 DEPARTMENT_ID 연결 후 
