@@ -1,0 +1,166 @@
+-- 존스의 급여보다 높은 급여를 받는 사원들 출력하기
+
+-- 존스의 급여 알아내기
+SELECT SAL
+FROM EMP
+WHERE ENAME = 'JONES';
+
+-- 높은 급여 사원 출력하기
+SELECT * FROM EMP WHERE SAL > 2975;
+
+-- 서브쿼리 : 쿼리문 안에 다른 쿼리문을 포함하고 있는 상태
+-- 단일행 서브쿼리 : >, <, =, <= , >=, 같지 않음 : <>, !=, ^=
+SELECT * FROM EMP WHERE SAL > (SELECT SAL FROM EMP WHERE ENAME = 'JONES');
+
+-- 사원이름이 ALLEN 인 사원의 추가수당보다 많이 받는 사원을 출력
+SELECT * FROM EMP WHERE comm > (SELECT comm FROM EMP WHERE ENAME = 'ALLEN');
+
+--이거 왜 안됨?
+SELECT * FROM EMP WHERE COMM > (SELECT COMM FORM emp WHERE ENAME = 'ALLEN');
+
+-- 사원이름이 WARD 인 사원의 입사일보다 빨리 입사한 사원을 출력
+SELECT * FROM EMP WHERE hiredate > (SELECT hiredate FROM EMP WHERE ENAME = 'WARD');
+
+-- 이거 왜 안됨?
+SELECT * FROM EMP WHERE hiredate < (SELECT hiredate FORM EMP WHERE ENAME = 'WARD');
+
+-- 20번 부서에 속한 사원 중 전체 사원의 평균 급여보다 높은 급여를 받는 사원 출력
+SELECT * FROM EMP WHERE hiredate > (SELECT hiredate FROM EMP WHERE DEPTNO = 20);
+
+SELECT * FROM EMP WHERE AVG(SAL) < (SELECT AVG(SAL)FORM EMP WHERE DEPTNO = 20);
+
+SELECT *
+FROM EMP
+WHERE DEPTNO = 20 AND SAL > (SELECT AVG(SAL) FROM EMP);
+
+-- 20번 부서에 속한 사원 중 전체 사원의 평균 급여보다 높은 급여를 받는 사원의 정보 출력
+SELECT E.EMPNO, E.ENAME, E.SAL, D.DEPTNO, D.DNAME, D.LOC
+FROM EMP E, DEPT D
+WHERE E.DEPTNO = D.DEPTNO AND  DEPTNO= 20 AND SAL > (SELECT AVG(SAL) FROM EMP);
+
+-- 서부쿼리 결과가 2개 이상 나오는 경우라면 단일행 서브쿼리의 연산자 사용 불가
+-- 다중행 서브쿼리
+-- SELECT * FROM EMP WHERE SAL >= (SELECT MAX(SAL) FROM EMP GROUP BY DEPTNO);
+
+SELECT MAX(SAL) FROM EMP GROUP BY DEPTNO;
+
+-- IN
+SELECT * FROM EMP WHERE SAL IN (SELECT MAX(SAL) FROM EMP GROUP BY DEPTNO);
+
+-- ANY(SUME)
+
+-- ANY : IN 의 수행 결과와 같게 나옴, 단, IN 을 더 많이 사용함
+SELECT * FROM EMP WHERE SAL = ANY (SELECT MAX(SAL) FROM EMP GROUP BY DEPTNO);
+
+SELECT * FROM EMP WHERE SAL = SOME (SELECT MAX(SAL) FROM EMP GROUP BY DEPTNO);
+
+-- 30번 부서 사원들의 최대 급여보다 적은 급여를 받는 사원 출력
+SELECT MAX(SAL) FROM EMP WHERE DEPTNO=30;
+
+SELECT * FROM EMP WHERE SAL < ANY (SELECT MAX(SAL) FROM EMP WHERE DEPTNO=30);
+
+SELECT * FROM EMP WHERE SAL < ANY (SELECT SAL FROM EMP WHERE DEPTNO=30);
+
+SELECT SAL FROM EMP WHERE DEPTNO=30;
+SELECT DISTINCT SAL FROM EMP WHERE DEPTNO=30;
+
+-- -- 30번 부서 사원들의 최소 급여보다 적은 급여를 받는 사원 출력
+SELECT * FROM EMP WHERE SAL > ANY (SELECT SAL FROM EMP WHERE DEPTNO=30);
+
+-- ALL : 서브 쿼리의 결과를 모두 만족하는 메인쿼리를 추출할 때
+-- 부서번호가 30번인 사원들의 최소 급여보다 더 적은 급여를 받는 사원 출력
+SELECT * FROM EMP WHERE SAL < ALL (SELECT SAL FROM EMP WHERE DEPTNO=30);
+
+-- EXISTS : IN 과 비슷한 개념, 단, IN 보다 성능이 우수함
+-- 서브 쿼리 결과가 존재하면 메인쿼리 결과도 출력
+
+SELECT * FROM EMP WHERE EXISTS (SELECT DNAME FROM DEPT WHERE DEPTNO=20);
+SELECT * FROM EMP WHERE NOT EXISTS (SELECT DNAME FROM DEPT WHERE DEPTNO=20);
+
+SELECT EMPNO, DEPTNO
+FROM EMP
+WHERE EXISTS (SELECT DEPTNO
+              FROM DEPT
+              WHERE DEPTNO IN (20,30) AND EMP.DEPTNO = DEPT.DEPTNO);
+              
+SELECT EMPNO, DEPTNO
+FROM EMP
+WHERE EXISTS (SELECT 1
+              FROM DEPT
+              WHERE DEPTNO IN (20,30) AND EMP.DEPTNO = DEPT.DEPTNO);
+              
+
+SELECT EMPNO, DEPTNO
+FROM EMP
+WHERE NOT EXISTS (SELECT DEPTNO
+              FROM DEPT
+              WHERE DEPTNO IN (20,30) AND EMP.DEPTNO = DEPT.DEPTNO);
+
+-- 20 30인 애들만 뽑아낸 것.
+
+-- 실습[19]
+-- 전체 사원 중 ALLEN과 같은 직책인 사원들의 사원정보, 부서 정보를 다음과 같이 출력하는 SQL문을 작성하시오
+
+SELECT E.JOB, E.EMPNO, E.ENAME, E.SAL, D.DEPTNO, D.DNAME
+FROM EMP E, DEPT D
+WHERE E.DEPTNO = D.DEPTNO AND E.JOB_ID IN (SELECT JOB FROM EMP WHERE ENAME = 'ALLEN'); 
+
+-- 전체 사원의 평균 급여보다 높은 급여를 받는 사원들의 사원 정보, 부서 정보, 급여 등급 정보를 출력하는 SQL문을 작성하시
+-- (단, 출력할 때 급여가 많은 순으로 정렬하되 급여가 같은 경우에는 사원 번호를 기준으로 오름차운으로 정렬하기)
+
+SELECT E.EMPTNO, E.ENAME, D.DNAME, E.HIREDATE, D.LOC, E.SAL, S.GRADE
+FROM EMP E, DEPT D, SALGRADE S
+WHERE E.DEPTNO = D.DEPTNO AND E.SAL BETWEEN S.LOSAL AND S.HISAL AND E.SAL >
+                 (SELECT AVG(SAL) FROM EMP) 
+ORDER BY E.SAL DESC, E.EMPNO ASC;
+
+-- 다중 열 서브쿼리 : 서브쿼리의 SELECT 문에 비교할 컬럼이 여러개 나오는 방식
+SELECT * FROM EMP WHERE (DEPTNO, SAL) IN
+            (SELECT DEPTNO, MAX(SAL) FROM EMP GROUP BY DEPTNO);
+
+-- FROM 절에 사용하는 서브쿼리(인라인 뷰)
+SELECT E,EMPNO, E.ENAME, D.DEPTNO, D.DNAME, D.LOC
+FROM (SELECT * FROM WHERE DEPTNO=10) E, (SELECT * FROM DEPT) D
+WHERE E.DEPTNO = D.DEPTNO;
+
+-- SELECT 절에 사용하는 서브쿼리 - 스칼라 서브쿼리
+
+-- 실습[23]
+-- 10번 부서에 근무하는 사원 중 30번 부서에는 존재하지 않는 직책을 가진
+-- 사원들의 사원정보, 부서 정보를 다음과 같이 출력하는 SQL문을 작성하시오.
+SELECT E.EMPNO, E.ENAME, E.JOB, D.DEPTNO, D.DNAME, D.LOC 
+FROM EMP E, DEPT D
+WHERE E.DEPTNO = D.DEPTNO E.JOB NOT EXISTS (SELECT DISTINCT JOB FROM EMP WHERE DEPTNO=30)
+AND E.DEPTNO=10;
+
+-- 직책이 SALESMAN인 사람들의 최고 급여보다 높은 급여를 받는 사우너들의 사원정보,
+-- 급여 등급 정보를 출력하는 SQL문을 작성하시오(단, 서브쿼리를 활용할 때 다중행 함수를
+-- 상요하는 방법과 사용하지 않는 방법을 통해 사원번호를 기준으로 오름차순 정렬하여 출력하시오
+SELECT EMPNO, ENAME, SAL, (SELECT GRADE FROM SALGRADE WHERE E.SAL DETWEEN LOSAL AND HISAL) AS GRADE
+FROM EMP
+WHERE SAL > (SELECT MAX(SAL) FROM EMP WHERE JOB='SALESMAN');
+
+SELECT E.EMPNO, E.ENAME, E.SAL, D.DNAME, E.HIREDATE, D.LOC, E.SAL, S.GRADE
+FROM EMP E, DEPT D, SALGRADE S
+WHERE E.DEPTNO = D.DEPTNO AND E.SAL BETWEEN S.LOSAL AND S.HISAL AND E.SAL > ALL 
+(SELECT SAL FROM EMP WHERE JOB='SALESMAN');
+
+-- 전체 사원의 평균 급여보다 높은 급여를 받는 사원들의 사원 정보, 부서 정보, 급여 등급 정보를 출력하는 SQL문을 작성하시
+-- (단, 출력할 때 급여가 많은 순으로 정렬하되 급여가 같은 경우에는 사원 번호를 기준으로 오름차운으로 정렬하기)
+
+--이거 에러남.
+SELECT E.EMPTNO, E.ENAME, D.DNAME, E.HIREDATE, D.LOC, E.SAL, S.GRADE
+FROM EMP E, DEPT D, SALGRADE S
+WHERE E.DEPTNO = D.DEPTNO AND E.SAL BETWEEN S.LOSAL AND S.HISAL AND E.SAL >
+                 (SELECT AVG(SAL) FROM EMP) 
+ORDER BY E.SAL DESC, E.EMPNO ASC;
+
+
+
+
+
+
+
+
+
+

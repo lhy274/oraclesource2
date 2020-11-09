@@ -135,7 +135,7 @@ where e.deptno = d.deptno and sal>=3000;
 
 -- emp 테이블의 별칭을 e로, dept 테이블 별칭을 d로 하여
 -- 급여가 2500이하이고, 사원번호가 9999 이하인 사원의 정보를 출력
-
+-- 겹치는 컬럼이 없어서 E. D. 안해줘도 되는 거. 안겹칠 땐 생략 가능
 select *
 from emp e, dept d
 WHERE E.DEPTNO = D.DEPTNO AND SAL<=2500 AND EMPNO <= 9999;
@@ -146,6 +146,16 @@ WHERE E.DEPTNO = D.DEPTNO AND SAL<=2500 AND EMPNO <= 9999;
 select *
 from emp e, SALGRADE S
 WHERE E.SAL BETWEEN S.LOSAL AND S.HISAL;
+
+-- 이건 의미 없는 나열인가? 5*14=70
+SELECT E.ENAME, E.SAL, S.GRADE
+FROM EMP E, SALGRADE S;
+
+SELECT * FROM SALGRADE;
+
+SELECT E1.ENAME, E2.ENAME AS MANAGER
+FROM EMP E1, EMP E2
+WHERE E1.MGR = E2.EMPNO AND E1.ENAME = 'SMITH';
 
 -- 2) 셀프조인(자체조인) : 조인 테이블이 자기 자신 테이블일때
 SELECT * FROM emp;
@@ -216,4 +226,71 @@ SELECT D1.DEPTNO, D1.DNAME, E1.EMPNO, E1.ENAME, E1.MGR, E1.SAL, E1.DEPTNO,
 FROM EMP E1, DEPT D1, SALGRADE S, EMP E2
 WHERE E1.DEPTNO(+) = D1.DEPTNO AND E1.SAL BETWEEN S.LOSAL(+) AND S.HISAL(+) AND E1.MGR = E2.EMPNO(+)
 ORDER BY E1.DEPTNO;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
