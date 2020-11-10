@@ -299,13 +299,21 @@ WHERE NOT EXISTS (SELECT DISTINCT 1
                   WHERE E2.MANAGER_ID = E1.EMPLOYEE_ID);
 
 
+-- 인덱스 확인
+CREATE TABLE INDEXTBL AS
+SELECT DISTINCT FIRST_NAME, LAST_NAME, HIRE_DATE FROM EMPLOYEES;
 
+SELECT * FROM INDEXTBL WHERE FIRST_NAME = 'Jack';
 
+-- 데이터베이스에서 검색의 향상 때문에 index 사용
+-- 인덱스 사용 여부에 따라 테이블 검색 방식을
+-- Table Full Scan, Index Scan 으로 구분
 
+-- 인덱스 생성
+CREATE INDEX IDX_INDEXTBL_FRISTNAME ON INDEXTBL(FIRST_NAME);
 
-
-
-
+-- 인덱스 삭제
+DROP INDEX IDX_INDEXTBL_FRISTNAME;
 
 
 
