@@ -716,3 +716,381 @@ BEGIN
 END;
 /
 
+-- 예외(오류)
+-- 컴파일 오류 / 런타임 오류
+DECLARE
+    V_WRONG NUMBER;
+BEGIN
+    SELECT DNAME INTO V_WRONG
+        FROM DEPT
+        WHERE DEPTNO = 10;
+EXCEPTION
+    WHEN VALUE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('예외처리 - 수치 또는 값 오류 발생');
+END;
+/
+
+-- 예외종류(Internal exception(내부예외) / user-defined exception(사용자정의예외))
+
+DECLARE
+    V_WRONG NUMBER;
+BEGIN
+    SELECT DNAME INTO V_WRONG
+        FROM DEPT
+        WHERE DEPTNO = 10;
+EXCEPTION
+    when TOO_MANY_ROWS THEN
+        DBMS_OUTPUT.PUT_LINE('예외처리 - 요구보다 많은 행 추출 오류 발생');
+    WHEN VALUE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('예외처리 - 수치 또는 값 오류 발생');
+    when OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('예외처리 - 사전 정의 외 오류 발생');
+END;
+/
+
+-- //SQL문 예외 처리 번호랑 메시지 보기
+DECLARE
+    V_WRONG NUMBER;
+BEGIN
+    SELECT DNAME INTO V_WRONG
+        FROM DEPT
+        WHERE DEPTNO = 10;
+EXCEPTION
+    when OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('예외처리 - 사전 정의 외 오류 발생');
+        DBMS_OUTPUT.PUT_LINE('SQLCODE : ' || TO_CHAR(SQLCODE)); -- SQLCODE(오류번호)
+        DBMS_OUTPUT.PUT_LINE('SQLERRM : ' || SQLERRM); --SQLERRM(오류메시지)
+END;
+/
+
+-- 실습[30]
+-- 명시적 커서를 사용하여 EMP 테이블의 전체 데이터를 조회한 후 커서 안의 데이터가
+-- 다음과 같이 출력되도록 PL/SQL 문 작성하기
+
+-- for
+
+DECLARE
+    -- 커서 테이터가 입력될 변수 선언
+    V_EMP_ROW EMP%ROWTYPE;
+     -- 명시적 커서 선언
+    CURSOR C1 IS
+        SELECT * FROM EMP;
+BEGIN
+    --커서 열기
+    OPEN C1;
+    LOOP 
+        -- 커서로부터 읽어온 데이터 사용(fetch)
+        FETCH C1 INTO V_EMP_ROW;
+        -- 커서의 모든 행을 읽어오기 위한 속성 지정
+        EXIT WHEN C1%NOTFOUND;
+        
+        DBMS_OUTPUT.PUT_LINE('EMPTNO : ' || V_EMP_ROW.EMPNO
+        || ' NAME : ' || V_EMP_ROW.eNAME || ' JOB : ' || V_EMP_ROW.JOB ||
+        ' SAL : ' || V_EMP_ROW.SAL || ' COMM : ' || V_EMP_ROW.COMM ||
+        ' MGR : ' || V_EMP_ROW.MGR || ' HIREDATE : ' || V_EMP_ROW.HIREDATE ||
+        ' DEPTNO : ' || V_EMP_ROW.DEPTNO );
+    END LOOP;  
+    -- 커서 닫기
+    CLOSE C1;
+END;
+/
+
+
+
+-- LOOP 사용한 방식 // .eNAME 그냥 네임
+DECLARE
+     -- 명시적 커서 선언
+    CURSOR C1 IS
+        SELECT * FROM EMP;
+BEGIN
+    for c1_rec in c1 LOOP 
+        -- 커서의 모든 행을 읽어오기 위한 속성 지정
+        EXIT WHEN C1%NOTFOUND;
+    
+        DBMS_OUTPUT.PUT_LINE('EMPTNO : ' ||  c1_rec.EMPNO
+        || ' NAME : ' || c1_rec.eNAME || ' JOB : ' || c1_rec.JOB ||
+        ' SAL : ' || c1_rec.SAL || ' COMM : ' || c1_rec.COMM ||
+        ' MGR : ' || c1_rec.MGR || ' HIREDATE : ' || c1_rec.HIREDATE ||
+        ' DEPTNO : ' || c1_rec.DEPTNO );
+    END LOOP;  
+    -- 커서 닫기
+    CLOSE C1;
+END;
+/
+
+-- for
+
+DECLARE
+    -- 커서 테이터가 입력될 변수 선언
+    V_EMP_ROW EMP%ROWTYPE;
+     -- 명시적 커서 선언
+    CURSOR C1 IS
+        SELECT * FROM EMP;
+BEGIN
+    --커서 열기
+    OPEN C1;
+    LOOP 
+        -- 커서로부터 읽어온 데이터 사용(fetch)
+        FETCH C1 INTO V_EMP_ROW;
+        -- 커서의 모든 행을 읽어오기 위한 속성 지정
+        EXIT WHEN C1%NOTFOUND;
+        
+        DBMS_OUTPUT.PUT_LINE('EMPTNO : ' || V_EMP_ROW.EMPNO
+        || ' NAME : ' || V_EMP_ROW.eNAME || ' JOB : ' || V_EMP_ROW.JOB ||
+        ' SAL : ' || V_EMP_ROW.SAL || ' COMM : ' || V_EMP_ROW.COMM ||
+        ' MGR : ' || V_EMP_ROW.MGR || ' HIREDATE : ' || V_EMP_ROW.HIREDATE ||
+        ' DEPTNO : ' || V_EMP_ROW.DEPTNO );
+    END LOOP;  
+    -- 커서 닫기
+    CLOSE C1;
+END;
+/
+
+-- 익명 블록 : 이름 없음, 저장할 수 없음, 실행할 대마다 컴파일, 공유 안됨,
+--            다른 응용프로그램에서 호출 안됨
+
+-- 저장 서브 프로그램 : 이름 지정, 저장 가능, 저장할 때 한 번 컴파일, 공유가능
+--                    호출가능
+
+-- 프로시저 생성
+CREATE OR REPLACE PROCEDURE PRO_NOPARAM
+IS
+    V_EMPNO NUMBER(4) := 77;
+    V_ENAME VARCHAR2(10);
+BEGIN
+    V_ENAME := 'SCOTT';
+    DBMS_OUTPUT.PUT_LINE('V_EMPNO : ' || V_EMPNO);
+    DBMS_OUTPUT.PUT_LINE('V_ENAME : ' || V_ENAME);
+END;
+/
+
+EXECUTE PRO_NOPARAM;
+
+-- PL/SQL 블록에서 프로시저 실행
+BEGIN
+    PRO_NOPARAM;
+END;
+/
+
+-- 프로시저 삭제하기
+DROP PROCEDURE PRO_NOPARAM;
+
+-- 프로시저에 파라미터 지정 : IN, OUT, IN OUT
+
+-- IN 파라미터(기본)
+CREATE OR REPLACE PROCEDURE PRO_NOPARAM_IN
+(
+    PARAM1 IN NUMBER,
+    PARAM2 NUMBER,
+    PARAM3 NUMBER :=3,
+    PARAM4 NUMBER DEFAULT 2
+)
+IS
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('PARAM1 : ' || PARAM1);
+    DBMS_OUTPUT.PUT_LINE('PARAM2 : ' || PARAM2);
+    DBMS_OUTPUT.PUT_LINE('PARAM3 : ' || PARAM3);
+    DBMS_OUTPUT.PUT_LINE('PARAM4 : ' || PARAM4);
+END;
+/
+
+EXECUTE PRO_NOPARAM_IN(1,2,7,8);
+
+EXECUTE PRO_NOPARAM_IN(1,2);
+
+EXECUTE PRO_NOPARAM_IN(1);
+
+
+-- OUT 모드 파라미터(프로시저 실행 후 호출한 프로그램으로 값 반환)
+CREATE  OR REPLACE PROCEDURE PRO_PARAM_OUT
+(
+    IN_EMPNO IN EMP.EMPNO%TYPE,
+    OUT_ENAME OUT EMP.ENAME%TYPE,
+    OUT_SAL OUT EMP.SAL%TYPE
+
+)
+IS
+BEGIN
+    SELECT ENAME, SAL INTO OUT_ENAME, OUT_SAL
+    FROM EMP
+    WHERE EMPNO = IN_EMPNO;
+END;
+/
+
+-- 다른 PL/SQL 블록에서 프로시저 사용
+DECLARE
+    V_ENAME EMP.ENAME%TYPE;
+    V_SAL EMP.SAL%TYPE;
+BEGIN
+    PRO_PARAM_OUT(7788, V_ENAME, V_SAL);
+    DBMS_OUTPUT.PUT_LINE('ENAME : ' || V_ENAME);
+    DBMS_OUTPUT.PUT_LINE('SAL : ' ||V_SAL);
+END;
+/
+
+-- IN OUT : IN, OUT 기능을 동시에 수행
+CREATE OR REPLACE PROCEDURE PRO_PAPAM_INOUT
+(
+    INOUT_NO IN OUT NUMBER
+)
+IS
+BEGIN
+    INOUT_NO := INOUT_NO * 2;
+END;
+/
+
+-- IN OUT 사용  // DBMS를 또 DEMS라고 함... BBBB!!!!!
+DECLARE
+    NO NUMBER;
+BEGIN
+    NO := 5;
+    PRO_PAPAM_INOUT(NO);
+    DBMS_OUTPUT.PUT_LINE('NO : ' || NO);
+END;
+/
+
+-- JAVADB에서 실행 // 연결을 SCOTT에서 JAVADB로 바꾸고 //mobile NVARCHAR2에 ; 콜론 찍음
+CREATE OR REPLACE PROCEDURE REGISTER_USER
+(
+    name NVARCHAR2,
+    year NUMBER,
+    addr NCHAR,
+    mobile NVARCHAR2
+)
+IS
+BEGIN
+    INSERT INTO userTBL(no, username, birthyear, addr, mobile)
+    VALUES(USERTBL_SEQ.nextval, name, year, addr, mobile);
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE(name || year || addr || mobile);
+END;
+/
+
+EXECUTE REGISTER_USER('대조영', '1996', '부산', '010-4569-4568');
+
+SELECT * FROM USERTBL;
+
+-- 실습 1번
+CREATE OR REPLACE PROCEDURE PRO_DEPT_IN
+(
+    INOUT_DEPTNO IN OUT DEPT.DEPTNO%TYPE,
+    OUT_DNAME OUT DEPT.DNAME%TYPE,
+    OUT_LOC OUT DEPT.LOC%TYPE
+)
+IS
+BEGIN
+    SELECT DEPTNO, DNAME, LOC  INTO INOUT_DEPTNO, OUT_DNAME, OUT_LOC
+    FROM DEPT
+    WHERE DEPTNO = INOUT_DEPTNO;
+END;
+/
+
+-- 실습 2 - 출력하기
+DECLARE
+    V_DEPTNO DEPT.DEPTNO%TYPE;
+    V_DNAME DEPT.DNAME%TYPE;
+    V_LOC DEPT.LOC%TYPE;
+BEGIN
+    V_DEPTNO := 10;
+    PRO_DEPT_IN(V_DEPTNO, V_DNAME,V_LOC);
+    DBMS_OUTPUT.PUT_LINE('부서번호 : ' || V_DEPTNO);
+    DBMS_OUTPUT.PUT_LINE('부서명 : ' || V_DNAME);
+    DBMS_OUTPUT.PUT_LINE('지역 : ' || V_LOC);
+END;
+/
+
+-- 트리거 : 데이터베이스 안의 특정 상황이나 동작, 즉 이벤트가 발생할 때 자동으로
+-- 실해시키는 기능
+
+-- BEFORE 트리거
+-- 트리거를 적용할 테이블 생성
+CREATE TABLE EMP_TRG AS SELECT * FROM EMP;
+
+-- EMP_TRG에 DML구문(사용시 주말이라면 사원정보 수정 불가) 사용시 트리거 발생
+-- RAISE_APPLICATION_ERROR : 사용자 정의 예외
+-- 예외지정코드는 -20000 ~ 20999 범위의 숫자를 사용 ///NODML_WEEKEND 에서  ML_WEEKEND 빼먹어서 안됐었는데 지금은 됨. 
+CREATE OR REPLACE TRIGGER TRG_EMP_NODML_WEEKEND
+BEFORE
+-- 트리거 작동
+INSERT OR UPDATE OR DELETE ON EMP_TRG
+BEGIN
+    IF TO_CHAR(SYSDATE, 'DY') IN ('토','일') THEN
+        IF INSERTING THEN
+            raise_application_error(-20000, '주말 사원정보 추가 불가');
+        ELSIF UPDATING THEN
+             RAISE_APPLICATION_ERROR(-20001, '주말 사원정보 수정 불가');
+        ELSIF deleting THEN
+            RAISE_APPLICATION_ERROR(-20002, '주말 사원정보 삭제 불가');
+        ELSE
+            RAISE_APPLICATION_ERROR(-20003, '주말 사원정보 변경 불가');
+        END IF;
+    END IF;
+END;
+/
+
+SELECT * FROM EMP_TRG;
+
+UPDATE EMP_TRG
+SET SAL = 3500
+WHERE EMPNO = 7788;
+
+-- 트리거 : AFTER
+-- EMP_TRG 테이블에 DML 명령어가 실행될 경우 테이블에 수행된 DML 명령어의
+-- 종류, DML 을 실행시킨 사용자, DML 명령어가 수행된 날짜와 시간 저장
+CREATE TABLE EMP_TRG_LOG(
+    TABLENAME VARCHAR2(10),
+    DML_TYPE VARCHAR2(10),
+    EMPNO NUMBER(4),
+    USER_NAME VARCHAR2(30),
+    CHANGE_DATE DATE);
+
+--
+CREATE OR REPLACE TRIGGER TRG_EMP_LOG
+AFTER
+INSERT OR DELETE OR UPDATE ON EMP_TRG
+FOR EACH ROW -- DML 문장에 의해 영향받는 행별로 실행
+
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO EMP_TRG_LOG
+        VALUES('EMP_TRG', 'INSERT', :NEW.EMPNO, SYS_CONTEXT('USERENV', 'SESSION_USER'), SYSDATE);
+    ELSIF UPDATING THEN
+         INSERT INTO EMP_TRG_LOG
+         VALUES('EMP_TRG', 'UPDATE', :OLD.EMPNO,
+         SYS_CONTEXT('USERENV', 'SESSION_USER'), SYSDATE); -- 현재 데이터베이스 접속자
+     ELSIF DELETING THEN
+         INSERT INTO EMP_TRG_LOG
+         VALUES('EMP_TRG', 'DELETE', :OLD.EMPNO, SYS_CONTEXT('USERENV', 'SESSION_USER'), SYSDATE);
+    END IF;
+END;
+/
+
+INSERT INTO EMP_TRG VALUES(9990, 'TESTemp', 'CLERK', 7788, TO_DATE('2018-03-03', 'YYYY-MM-DD'), 1200, NULL,20);
+
+SELECT * FROM EMP_TRG;
+SELECT * FROM EMP_TRG_LOG;
+
+UPDATE EMP_TRG
+SET SAL = 1300
+WHERE MGR = 7788;
+
+-- 트리거 조회
+SELECT *
+FROM USER_TRIGGERS;
+
+-- 트리거 삭제
+DROP TRIGGER TRG_EMP_LOG; -- 이름 바꿔
+
+-- 트리거 변경(활성화 혹은 비호라성화) ENABLE OR DISABLE
+ALTER TRIGGER TRG_EMP_NODML_WEEKEND DISABLE;
+ALTER TRIGGER TRG_EMP_NODML_WEEKEND ENABLE;
+ALTER TRIGGER TRG_EMP_LOG DISABLE;
+ALTER TRIGGER TRG_EMP_LOG ENABLE;
+
+
+
+
+
+
+
+
