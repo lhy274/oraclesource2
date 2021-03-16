@@ -21,3 +21,20 @@ VALUES(USERTBL_SEQ.NEXTVAL,'±è¼®È£',1995,'¾È»ê','010-8888-6954');
 COMMIT;
 
 SELECT * FROM USERTBL;
+
+
+select rn, board.bno, title, writer, regdate, updatedate, 
+			photo_attach.uuid,photo_attach.uploadPath,
+			photo_attach.fileName, photo_attach.fileType		
+from(select *
+     from (select /*+INDEX_DESC(photo_board pk_photo_board)*/ rownum rn, bno, title, writer, regdate, updatedate
+	       from photo_board)
+     )board left outer join photo_attach on board.bno = photo_attach.bno where rownum<=(1*9)
+where rn> (1-1)*9;	
+
+
+
+select *
+ from (select /*+INDEX_DESC(photo_board pk_photo_board)*/ rownum rn, bno, title, writer, regdate, updatedate
+	       from photo_board)
+     board left outer join photo_attach on board.bno = photo_attach.bno where rownum<=(1*9)
